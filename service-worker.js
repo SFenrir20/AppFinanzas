@@ -1,4 +1,4 @@
-const cacheName = "appfinanzas-static-v2";
+﻿const cacheName = "appfinanzas-static-v3";
 const appShell = [
   "./",
   "./index.html",
@@ -25,3 +25,4 @@ self.addEventListener("fetch", (event) => {
     caches.match(event.request).then((response) => response || fetch(event.request)),
   );
 });
+

@@ -1,279 +1,465 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="App web de finanzas personales con Supabase para registrar ingresos y egresos."
+      content="Tablero personal para controlar sueldo, cuentas bancarias, tarjetas de credito y gastos."
     />
-    <meta name="theme-color" content="#123524" />
+    <meta name="theme-color" content="#18230f" />
     <title>AppFinanzas</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="background-glow glow-one"></div>
-    <div class="background-glow glow-two"></div>
+    <div class="page-orb orb-one"></div>
+    <div class="page-orb orb-two"></div>
 
     <header class="hero">
-      <div class="hero__copy">
-        <p class="eyebrow">Finanzas personales</p>
-        <h1>AppFinanzas</h1>
+      <section class="hero__copy">
+        <p class="eyebrow">Panel financiero personal</p>
+        <h1>Tu dinero neto y tus tarjetas en una sola vista</h1>
         <p class="hero__text">
-          Lleva control de tus ingresos y egresos con una cuenta propia para que tus datos
-          se sincronicen entre laptop y celular.
+          Configura tu sueldo una sola vez, registra en que bancos guardas tu dinero y mira
+          como se consumen tus tarjetas conforme haces gastos.
         </p>
-        <div class="hero__meta">
-          <span>Supabase Auth</span>
-          <span>Sincronizacion por usuario</span>
-          <span>Lista para iPhone desde web</span>
-        </div>
-      </div>
-
-      <section class="settings-card" aria-label="Autenticacion y configuracion">
-        <div class="settings-card__header">
-          <h2>Acceso</h2>
-          <p id="syncStatus">Conecta tu proyecto de Supabase para empezar.</p>
-        </div>
-
-        <div id="setupBanner" class="notice-card notice-card--warning">
-          <h3>Falta conectar Supabase</h3>
-          <p>
-            Completa `supabase-config.js` con tu `Project URL` y tu `anon key`, y ejecuta el
-            SQL incluido en `supabase/schema.sql`.
-          </p>
-        </div>
-
-        <form id="authForm" class="auth-form">
-          <label class="field">
-            <span>Correo</span>
-            <input id="authEmail" type="email" placeholder="tu-correo@email.com" required />
-          </label>
-
-          <label class="field">
-            <span>Contrasena</span>
-            <input
-              id="authPassword"
-              type="password"
-              minlength="6"
-              placeholder="Minimo 6 caracteres"
-              required
-            />
-          </label>
-
-          <div class="auth-actions">
-            <button class="button" id="signInButton" type="submit">Iniciar sesion</button>
-            <button class="button button--ghost" id="signUpButton" type="button">
-              Crear cuenta
-            </button>
-          </div>
-        </form>
-
-        <div id="sessionCard" class="session-card" hidden>
-          <div>
-            <p class="section-label">Sesion activa</p>
-            <h3 id="sessionEmail">Sin usuario</h3>
-          </div>
-          <button class="button button--ghost" id="signOutButton" type="button">
-            Cerrar sesion
-          </button>
-        </div>
-
-        <label class="field">
-          <span>Moneda</span>
-          <select id="currencySelect">
-            <option value="PEN">Soles (PEN)</option>
-            <option value="USD">Dolares (USD)</option>
-            <option value="EUR">Euros (EUR)</option>
-          </select>
-        </label>
-
-        <div class="settings-card__actions">
-          <button class="button button--ghost" id="exportButton" type="button">
-            Exportar JSON
-          </button>
-          <label class="button button--ghost button--file">
-            Importar JSON
-            <input id="importInput" type="file" accept="application/json" />
-          </label>
-          <button class="button button--danger" id="clearButton" type="button">
-            Borrar mis movimientos
-          </button>
+        <div class="hero__chips">
+          <span>Sueldo base</span>
+          <span>Cuentas bancarias</span>
+          <span>Tarjetas con fecha de facturacion</span>
         </div>
       </section>
-    </header>
 
-    <main class="layout">
-      <section class="panel panel--form">
-        <div class="section-heading">
-          <div>
-            <p class="section-label">Nuevo movimiento</p>
-            <h2>Registrar ingreso o egreso</h2>
+      <aside class="hero__side">
+        <section class="panel auth-panel">
+          <div class="section-heading section-heading--stack">
+            <div>
+              <p class="section-label">Acceso</p>
+              <h2>Tu cuenta</h2>
+            </div>
+            <p id="syncStatus" class="section-description">
+              Conecta tu proyecto de Supabase para empezar.
+            </p>
           </div>
-          <p class="section-description">
-            Los movimientos se guardan en Supabase y quedan asociados a tu cuenta.
-          </p>
-        </div>
 
-        <div id="authRequiredCard" class="notice-card">
-          <h3>Necesitas iniciar sesion</h3>
-          <p>Entra con tu cuenta para guardar y ver tus finanzas sincronizadas.</p>
-        </div>
+          <div id="setupBanner" class="notice-card notice-card--warning">
+            <h3>Actualiza la base de datos</h3>
+            <p>
+              Esta version necesita el nuevo SQL de `supabase/schema.sql` para guardar perfil,
+              cuentas, tarjetas y gastos.
+            </p>
+          </div>
 
-        <form id="transactionForm" class="transaction-form" hidden>
-          <div class="form-grid">
+          <form id="authForm" class="stack-form">
             <label class="field">
-              <span>Tipo</span>
-              <select id="type" name="type" required>
-                <option value="income">Ingreso</option>
-                <option value="expense">Egreso</option>
-              </select>
+              <span>Correo</span>
+              <input id="authEmail" type="email" placeholder="tu-correo@email.com" required />
             </label>
 
             <label class="field">
-              <span>Monto</span>
+              <span>Contrasena</span>
               <input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
+                id="authPassword"
+                type="password"
+                minlength="6"
+                placeholder="Minimo 6 caracteres"
                 required
               />
             </label>
 
-            <label class="field">
-              <span>Categoria</span>
-              <select id="category" name="category" required></select>
-            </label>
+            <div class="button-row">
+              <button class="button" id="signInButton" type="submit">Iniciar sesion</button>
+              <button class="button button--ghost" id="signUpButton" type="button">
+                Crear cuenta
+              </button>
+            </div>
+          </form>
 
-            <label class="field">
-              <span>Fecha</span>
-              <input id="date" name="date" type="date" required />
-            </label>
-
-            <label class="field field--wide">
-              <span>Descripcion</span>
-              <input
-                id="description"
-                name="description"
-                type="text"
-                maxlength="80"
-                placeholder="Ej. sueldo, mercado, taxi, freelance"
-              />
-            </label>
+          <div id="sessionCard" class="session-card" hidden>
+            <div>
+              <p class="section-label">Sesion activa</p>
+              <h3 id="sessionEmail">Sin usuario</h3>
+            </div>
+            <button class="button button--ghost" id="signOutButton" type="button">
+              Cerrar sesion
+            </button>
           </div>
 
-          <div class="form-actions">
-            <button class="button" type="submit">Guardar movimiento</button>
+          <label class="field">
+            <span>Moneda</span>
+            <select id="currencySelect">
+              <option value="PEN">Soles (PEN)</option>
+              <option value="USD">Dolares (USD)</option>
+              <option value="EUR">Euros (EUR)</option>
+            </select>
+          </label>
+        </section>
+      </aside>
+    </header>
+
+    <main class="layout">
+      <section id="authRequiredCard" class="panel notice-card notice-card--plain">
+        <h3>Necesitas iniciar sesion</h3>
+        <p>Entra con tu cuenta para configurar sueldo, cuentas y tarjetas.</p>
+      </section>
+
+      <section id="onboardingPanel" class="panel panel--wide" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="section-label">Configuracion inicial</p>
+            <h2>Arma tu mapa financiero</h2>
+          </div>
+          <p class="section-description">
+            Esto se hace una vez y luego puedes seguir agregando cuentas o tarjetas.
+          </p>
+        </div>
+
+        <form id="setupForm" class="setup-grid">
+          <section class="setup-card">
+            <h3>Sueldo</h3>
+            <label class="field">
+              <span>Cuanto es tu sueldo mensual</span>
+              <input
+                id="salaryInput"
+                name="salary"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                required
+              />
+            </label>
+          </section>
+
+          <section class="setup-card">
+            <div class="section-heading section-heading--compact">
+              <div>
+                <h3>Cuentas bancarias</h3>
+                <p class="section-description">Pon donde guardas tu dinero neto.</p>
+              </div>
+              <button class="button button--ghost" id="addBankRowButton" type="button">
+                Agregar cuenta
+              </button>
+            </div>
+            <div id="bankRows" class="dynamic-list"></div>
+          </section>
+
+          <section class="setup-card">
+            <div class="section-heading section-heading--compact">
+              <div>
+                <h3>Tarjetas de credito</h3>
+                <p class="section-description">Agrega limite y fecha de facturacion.</p>
+              </div>
+              <button class="button button--ghost" id="addCardRowButton" type="button">
+                Agregar tarjeta
+              </button>
+            </div>
+            <div id="cardRows" class="dynamic-list"></div>
+          </section>
+
+          <div class="setup-actions">
+            <button class="button" type="submit">Guardar configuracion inicial</button>
           </div>
         </form>
       </section>
 
-      <section class="stats-grid" aria-label="Resumen financiero">
-        <article class="stat-card stat-card--income">
-          <p>Ingresos</p>
-          <strong id="incomeValue">S/ 0.00</strong>
-        </article>
-        <article class="stat-card stat-card--expense">
-          <p>Egresos</p>
-          <strong id="expenseValue">S/ 0.00</strong>
-        </article>
-        <article class="stat-card stat-card--balance">
-          <p>Balance</p>
-          <strong id="balanceValue">S/ 0.00</strong>
-        </article>
-        <article class="stat-card stat-card--count">
-          <p>Movimientos</p>
-          <strong id="countValue">0</strong>
-        </article>
-      </section>
-
-      <section class="panel panel--insights">
-        <div class="section-heading">
-          <div>
-            <p class="section-label">Vista general</p>
-            <h2>Resumen del mes</h2>
-          </div>
-        </div>
-
-        <div class="insights-grid">
-          <article class="mini-card">
-            <p>Gasto promedio</p>
-            <strong id="avgExpenseValue">S/ 0.00</strong>
+      <section id="dashboardContent" hidden>
+        <section class="stats-grid">
+          <article class="stat-card stat-card--salary">
+            <p>Sueldo mensual</p>
+            <strong id="salaryValue">S/ 0.00</strong>
           </article>
-          <article class="mini-card">
-            <p>Mayor egreso</p>
-            <strong id="topExpenseValue">S/ 0.00</strong>
+          <article class="stat-card stat-card--net">
+            <p>Dinero neto disponible</p>
+            <strong id="netWorthValue">S/ 0.00</strong>
           </article>
-          <article class="mini-card">
-            <p>Ahorro estimado</p>
-            <strong id="savingsRateValue">0%</strong>
+          <article class="stat-card stat-card--credit">
+            <p>Credito usado</p>
+            <strong id="creditUsedValue">S/ 0.00</strong>
           </article>
-        </div>
-      </section>
+          <article class="stat-card stat-card--available">
+            <p>Credito restante</p>
+            <strong id="creditAvailableValue">S/ 0.00</strong>
+          </article>
+        </section>
 
-      <section class="panel panel--breakdown">
-        <div class="section-heading">
-          <div>
-            <p class="section-label">Analisis</p>
-            <h2>Gastos por categoria</h2>
+        <section class="panel charts-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Visualizacion</p>
+              <h2>Donde esta tu dinero y como gira tu credito</h2>
+            </div>
           </div>
-        </div>
-        <div id="categoryBreakdown" class="breakdown-list"></div>
-      </section>
 
-      <section class="panel panel--history">
-        <div class="section-heading">
-          <div>
-            <p class="section-label">Historial</p>
-            <h2>Tus movimientos</h2>
+          <div class="charts-grid">
+            <article class="chart-card">
+              <div class="section-heading section-heading--compact">
+                <div>
+                  <h3>Dinero neto por cuenta</h3>
+                  <p class="section-description">Solo cuentas reales, sin credito.</p>
+                </div>
+              </div>
+              <div id="netBarChart" class="bar-chart"></div>
+            </article>
+
+            <article class="chart-card">
+              <div class="section-heading section-heading--compact">
+                <div>
+                  <h3>Tarjetas de credito</h3>
+                  <p class="section-description">Cada aro muestra lo consumido vs. el limite.</p>
+                </div>
+              </div>
+              <div id="creditDonutGrid" class="donut-grid"></div>
+            </article>
           </div>
-          <div class="filters">
-            <label class="field field--compact">
-              <span>Filtrar por tipo</span>
-              <select id="filterType">
-                <option value="all">Todos</option>
-                <option value="income">Ingresos</option>
-                <option value="expense">Egresos</option>
-              </select>
-            </label>
+        </section>
 
-            <label class="field field--compact">
-              <span>Buscar</span>
-              <input
-                id="searchInput"
-                type="search"
-                placeholder="Categoria o descripcion"
-              />
-            </label>
+        <section class="content-grid">
+          <section class="panel">
+            <div class="section-heading">
+              <div>
+                <p class="section-label">Nuevo gasto</p>
+                <h2>Registrar consumo</h2>
+              </div>
+            </div>
+
+            <form id="expenseForm" class="stack-form">
+              <div class="form-grid">
+                <label class="field">
+                  <span>Monto</span>
+                  <input
+                    id="expenseAmount"
+                    name="amount"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                  />
+                </label>
+
+                <label class="field">
+                  <span>Categoria</span>
+                  <select id="expenseCategory" name="category" required>
+                    <option value="Comida">Comida</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Servicios">Servicios</option>
+                    <option value="Hogar">Hogar</option>
+                    <option value="Salud">Salud</option>
+                    <option value="Compras">Compras</option>
+                    <option value="Ocio">Ocio</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Fecha</span>
+                  <input id="expenseDate" name="expenseDate" type="date" required />
+                </label>
+
+                <label class="field">
+                  <span>Pagado con</span>
+                  <select id="paymentType" name="paymentType" required>
+                    <option value="bank_account">Cuenta bancaria</option>
+                    <option value="credit_card">Tarjeta de credito</option>
+                  </select>
+                </label>
+
+                <label class="field field--wide">
+                  <span>Origen del gasto</span>
+                  <select id="paymentSource" name="paymentSource" required></select>
+                </label>
+
+                <label class="field field--wide">
+                  <span>Descripcion</span>
+                  <input
+                    id="expenseDescription"
+                    name="description"
+                    type="text"
+                    maxlength="90"
+                    placeholder="Ej. supermercado, taxi, streaming"
+                  />
+                </label>
+              </div>
+
+              <div class="button-row">
+                <button class="button" type="submit">Guardar gasto</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <div>
+                <p class="section-label">Estructura</p>
+                <h2>Tu dinero y tus tarjetas</h2>
+              </div>
+            </div>
+
+            <form id="salaryForm" class="stack-form slim-form">
+              <label class="field">
+                <span>Actualizar sueldo</span>
+                <input
+                  id="salaryUpdateInput"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  required
+                />
+              </label>
+              <button class="button button--ghost" type="submit">Guardar sueldo</button>
+            </form>
+
+            <div class="manager-grid">
+              <form id="accountForm" class="manager-card stack-form">
+                <h3>Agregar cuenta bancaria</h3>
+                <label class="field">
+                  <span>Banco</span>
+                  <input id="accountBank" type="text" maxlength="50" placeholder="BCP" required />
+                </label>
+                <label class="field">
+                  <span>Nombre de la cuenta</span>
+                  <input id="accountName" type="text" maxlength="50" placeholder="Cuenta sueldo" required />
+                </label>
+                <label class="field">
+                  <span>Saldo actual</span>
+                  <input id="accountBalance" type="number" min="0" step="0.01" placeholder="0.00" required />
+                </label>
+                <button class="button button--ghost" type="submit">Agregar cuenta</button>
+              </form>
+
+              <form id="creditCardForm" class="manager-card stack-form">
+                <h3>Agregar tarjeta</h3>
+                <label class="field">
+                  <span>Banco</span>
+                  <input id="cardBank" type="text" maxlength="50" placeholder="Interbank" required />
+                </label>
+                <label class="field">
+                  <span>Nombre de la tarjeta</span>
+                  <input id="cardName" type="text" maxlength="50" placeholder="Visa oro" required />
+                </label>
+                <label class="field">
+                  <span>Linea de credito</span>
+                  <input id="cardLimit" type="number" min="0" step="0.01" placeholder="0.00" required />
+                </label>
+                <label class="field">
+                  <span>Facturacion</span>
+                  <input id="cardBillingDay" type="number" min="1" max="31" placeholder="15" required />
+                </label>
+                <button class="button button--ghost" type="submit">Agregar tarjeta</button>
+              </form>
+            </div>
+
+            <div class="resource-columns">
+              <div>
+                <h3 class="subheading">Cuentas activas</h3>
+                <div id="accountsList" class="resource-list"></div>
+              </div>
+              <div>
+                <h3 class="subheading">Tarjetas activas</h3>
+                <div id="cardsList" class="resource-list"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="panel panel--wide">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Historial</p>
+              <h2>Gastos registrados</h2>
+            </div>
+            <div class="filters">
+              <label class="field field--compact">
+                <span>Fuente</span>
+                <select id="historyFilter">
+                  <option value="all">Todo</option>
+                  <option value="bank_account">Cuenta bancaria</option>
+                  <option value="credit_card">Tarjeta de credito</option>
+                </select>
+              </label>
+
+              <label class="field field--compact">
+                <span>Buscar</span>
+                <input id="historySearch" type="search" placeholder="Categoria o descripcion" />
+              </label>
+            </div>
           </div>
-        </div>
 
-        <div id="emptyState" class="empty-state">
-          <h3>Aun no tienes movimientos</h3>
-          <p>Empieza agregando tu primer ingreso o egreso para ver tu resumen.</p>
-        </div>
+          <div id="expensesEmptyState" class="empty-state">
+            <h3>Aun no tienes gastos</h3>
+            <p>Empieza registrando un consumo para ver como afecta tus cuentas o tarjetas.</p>
+          </div>
 
-        <div id="transactionList" class="transaction-list"></div>
+          <div id="expensesList" class="expense-list"></div>
+        </section>
       </section>
     </main>
 
-    <template id="transactionTemplate">
-      <article class="transaction-item">
-        <div class="transaction-item__meta">
-          <span class="badge"></span>
+    <template id="bankRowTemplate">
+      <article class="dynamic-row">
+        <label class="field">
+          <span>Banco</span>
+          <input data-field="bank_name" type="text" maxlength="50" placeholder="BCP" required />
+        </label>
+        <label class="field">
+          <span>Cuenta</span>
+          <input
+            data-field="account_name"
+            type="text"
+            maxlength="50"
+            placeholder="Cuenta sueldo"
+            required
+          />
+        </label>
+        <label class="field">
+          <span>Saldo</span>
+          <input data-field="balance" type="number" min="0" step="0.01" placeholder="0.00" required />
+        </label>
+        <button class="icon-button icon-button--row" data-action="remove-row" type="button">
+          Quitar
+        </button>
+      </article>
+    </template>
+
+    <template id="cardRowTemplate">
+      <article class="dynamic-row">
+        <label class="field">
+          <span>Banco</span>
+          <input data-field="bank_name" type="text" maxlength="50" placeholder="BBVA" required />
+        </label>
+        <label class="field">
+          <span>Tarjeta</span>
+          <input data-field="card_name" type="text" maxlength="50" placeholder="Visa classic" required />
+        </label>
+        <label class="field">
+          <span>Linea</span>
+          <input data-field="credit_limit" type="number" min="0" step="0.01" placeholder="0.00" required />
+        </label>
+        <label class="field">
+          <span>Facturacion</span>
+          <input data-field="billing_day" type="number" min="1" max="31" placeholder="18" required />
+        </label>
+        <button class="icon-button icon-button--row" data-action="remove-row" type="button">
+          Quitar
+        </button>
+      </article>
+    </template>
+
+    <template id="expenseItemTemplate">
+      <article class="expense-item">
+        <div class="expense-item__meta">
+          <span class="expense-badge"></span>
           <div>
-            <h3 class="transaction-title"></h3>
-            <p class="transaction-date"></p>
+            <h3 class="expense-title"></h3>
+            <p class="expense-date"></p>
           </div>
         </div>
-        <div class="transaction-item__amount"></div>
-        <button class="icon-button" type="button" aria-label="Eliminar movimiento">
-          Eliminar
-        </button>
+        <div class="expense-source"></div>
+        <div class="expense-amount"></div>
+        <button class="icon-button" type="button">Eliminar</button>
       </article>
     </template>
 
