@@ -1,18 +1,8 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 
 import { apiRequest } from "../api/client";
+import { User } from "../api/types";
 import { clearStoredToken, getStoredToken, storeToken } from "./tokenStore";
-
-type UserProfile = {
-  currency: string;
-  monthly_salary: string;
-};
-
-export type User = {
-  id: number;
-  email: string;
-  profile: UserProfile;
-};
 
 type AuthContextValue = {
   token: string | null;
