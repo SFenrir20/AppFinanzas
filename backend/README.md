@@ -29,3 +29,12 @@ Use environment variables or a local `.env` file. Never commit real secrets.
 - `DATABASE_URL`: SQLAlchemy database URL. Local development uses PostgreSQL from Docker Compose.
 - `JWT_SECRET_KEY`: signing key for access tokens.
 - `CORS_ORIGINS`: comma-separated origins allowed by the API.
+
+## Tests
+
+```powershell
+python -m flake8 app tests
+python -m pytest
+```
+
+The test suite uses SQLite in memory for speed, while development and future production use PostgreSQL.
