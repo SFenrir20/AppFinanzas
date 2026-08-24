@@ -1,12 +1,12 @@
 import { ReactNode } from "react";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
 import { colors, radii, shadow } from "../design/tokens";
 
 type Props = {
   children: ReactNode;
   dark?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function Card({ children, dark, style }: Props) {

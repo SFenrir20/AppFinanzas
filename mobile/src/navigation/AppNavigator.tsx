@@ -3,9 +3,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ActivityIndicator, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
-import { HomeScreen } from "../screens/HomeScreen";
 import { LoginScreen } from "../screens/LoginScreen";
+import { MainTabsScreen } from "../screens/MainTabsScreen";
+import { NewMovementScreen } from "../screens/NewMovementScreen";
 import { OnboardingScreen } from "../screens/OnboardingScreen";
+import { ReceiptScannerScreen } from "../screens/ReceiptScannerScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
 import { SplashScreen } from "../screens/SplashScreen";
 
@@ -14,7 +16,9 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Login: undefined;
   Register: undefined;
-  Home: undefined;
+  Main: undefined;
+  NewMovement: undefined;
+  Scanner: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -34,7 +38,15 @@ export function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {token ? (
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <>
+            <Stack.Screen name="Main" component={MainTabsScreen} />
+            <Stack.Screen
+              name="NewMovement"
+              component={NewMovementScreen}
+              options={{ presentation: "modal" }}
+            />
+            <Stack.Screen name="Scanner" component={ReceiptScannerScreen} />
+          </>
         ) : (
           <>
             <Stack.Screen name="Splash" component={SplashScreen} />
