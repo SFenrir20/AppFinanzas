@@ -2,7 +2,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { AppButton } from "../components/AppButton";
+import { LogoMark } from "../components/LogoMark";
+import { Screen } from "../components/Screen";
 import { useAuth } from "../auth/AuthContext";
+import { colors, radii } from "../design/tokens";
 import { RootStackParamList } from "../navigation/AppNavigator";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
@@ -25,8 +29,12 @@ export function RegisterScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Crear cuenta</Text>
+    <Screen>
+      <View style={styles.header}>
+        <LogoMark size={54} />
+        <Text style={styles.title}>Crear cuenta</Text>
+        <Text style={styles.copy}>Empieza con correo y contrasena. Podras completar tu perfil despues.</Text>
+      </View>
       <TextInput
         autoCapitalize="none"
         keyboardType="email-address"
@@ -42,21 +50,29 @@ export function RegisterScreen({ navigation }: Props) {
         style={styles.input}
         value={password}
       />
-      <Pressable disabled={submitting} onPress={handleSubmit} style={styles.primaryButton}>
-        <Text style={styles.primaryButtonText}>{submitting ? "Creando..." : "Crear cuenta"}</Text>
-      </Pressable>
+      <AppButton disabled={submitting} onPress={handleSubmit}>
+        {submitting ? "Creando..." : "Crear cuenta"}
+      </AppButton>
       <Pressable onPress={() => navigation.goBack()} style={styles.linkButton}>
-        <Text>Ya tengo cuenta</Text>
+        <Text style={styles.linkText}>Ya tengo cuenta</Text>
       </Pressable>
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, gap: 12, justifyContent: "center", padding: 24 },
-  input: { borderColor: "#D0D5DD", borderRadius: 8, borderWidth: 1, padding: 12 },
+  copy: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: 8, textAlign: "center" },
+  header: { alignItems: "center", gap: 8, marginBottom: 28, marginTop: 64 },
+  input: {
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    marginBottom: 14,
+    minHeight: 56,
+    paddingHorizontal: 16,
+  },
   linkButton: { alignItems: "center", padding: 12 },
-  primaryButton: { alignItems: "center", backgroundColor: "#1F2937", borderRadius: 8, padding: 14 },
-  primaryButtonText: { color: "#FFFFFF", fontWeight: "700" },
-  title: { fontSize: 28, fontWeight: "700", marginBottom: 12 },
+  linkText: { color: colors.primary, fontWeight: "700" },
+  title: { color: colors.text, fontSize: 28, fontWeight: "900" },
 });

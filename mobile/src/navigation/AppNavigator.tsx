@@ -5,9 +5,13 @@ import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../auth/AuthContext";
 import { HomeScreen } from "../screens/HomeScreen";
 import { LoginScreen } from "../screens/LoginScreen";
+import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
+import { SplashScreen } from "../screens/SplashScreen";
 
 export type RootStackParamList = {
+  Splash: undefined;
+  Onboarding: undefined;
   Login: undefined;
   Register: undefined;
   Home: undefined;
@@ -28,17 +32,15 @@ export function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {token ? (
-          <Stack.Screen name="Home" component={HomeScreen} options={{ title: "AppFinanzas" }} />
+          <Stack.Screen name="Home" component={HomeScreen} />
         ) : (
           <>
-            <Stack.Screen name="Login" component={LoginScreen} options={{ title: "Ingresar" }} />
-            <Stack.Screen
-              name="Register"
-              component={RegisterScreen}
-              options={{ title: "Crear cuenta" }}
-            />
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
           </>
         )}
       </Stack.Navigator>
