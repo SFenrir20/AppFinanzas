@@ -54,7 +54,9 @@ npm run start
 
 ## Estado del MVP
 
-El backend del MVP cubre registro e inicio de sesion, perfil financiero, cuentas bancarias, tarjetas de credito, gastos, pagos de tarjeta y resumen financiero. La app movil incluye shell de autenticacion y clientes API tipados; las pantallas financieras finales quedan pendientes del diseno Figma.
+El backend del MVP cubre registro e inicio de sesion, perfil financiero, cuentas bancarias, tarjetas de credito, gastos, pagos de tarjeta y resumen financiero. La app movil implementa las pantallas base del diseno Finza para splash, onboarding, login, inicio, movimientos, presupuesto, metas, perfil, nuevo movimiento y escaner.
+
+Presupuesto, metas, OAuth, biometria, seguridad avanzada y escaneo de comprobantes se muestran como UI local o acciones deshabilitadas porque el backend aun no expone esos servicios. No se simula sincronizacion remota para esas funciones.
 
 Las notificaciones, publicacion en tiendas, CloudFront y Firebase quedan fuera del alcance inicial.
 
