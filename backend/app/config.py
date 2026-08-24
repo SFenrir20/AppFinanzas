@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     database_url: PostgresDsn = Field(
         default="postgresql+psycopg://appfinanzas:appfinanzas@localhost:5432/appfinanzas"
     )
-    jwt_secret_key: str = Field(default="change-this-development-secret", min_length=16)
+    jwt_secret_key: str = Field(
+        default="change-this-development-secret-at-least-32-chars", min_length=32
+    )
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7
     cors_origins: str = "http://localhost:8081,http://localhost:19006"
