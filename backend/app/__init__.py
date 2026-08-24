@@ -1,0 +1,1 @@
+"""AppFinanzas backend package."""
