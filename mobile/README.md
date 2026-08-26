@@ -31,3 +31,15 @@ npm run start
 ```
 
 Use Expo Go or a development build. On a physical phone, set `EXPO_PUBLIC_API_URL` to a LAN URL that can reach the FastAPI backend.
+
+Android release previews that point to a local HTTP backend also need cleartext traffic enabled at build time:
+
+```powershell
+$env:EXPO_PUBLIC_API_URL="http://<LAN_IP>:8000"
+$env:EXPO_ALLOW_CLEARTEXT="1"
+npx expo prebuild --platform android
+```
+
+The local Expo config plugin writes `android:usesCleartextTraffic="true"` only when that variable is enabled.
+
+Do not enable `EXPO_ALLOW_CLEARTEXT` for production builds. Production API URLs should use HTTPS.
