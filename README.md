@@ -1,47 +1,101 @@
-# AppFinanzas
+# Finza
 
-AppFinanzas se esta migrando desde una PWA estatica hacia una app movil instalable con backend propio.
+Finza es una aplicación móvil de finanzas personales pensada para ayudar a registrar movimientos, entender el balance del mes y tomar mejores decisiones sobre el dinero diario.
 
-## Arquitectura objetivo
+El proyecto nace como una evolución de una PWA anterior y ahora avanza hacia una app instalable para Android y iPhone, con backend propio y base de datos PostgreSQL. La app móvil no se conecta directamente a la base de datos: todas las operaciones pasan por la API de Finza.
+
+## Qué hace
+
+Finza permite centralizar información financiera personal en una experiencia móvil simple:
+
+- Registro e inicio de sesión con autenticación propia.
+- Perfil financiero básico con moneda y salario mensual.
+- Resumen financiero con saldo total, gasto mensual, crédito usado/disponible y distribución por categoría.
+- Cuentas bancarias y tarjetas de crédito.
+- Listado de movimientos.
+- Registro de gastos desde cuenta bancaria o tarjeta de crédito.
+- Pagos de tarjeta desde una cuenta bancaria.
+- Pantallas para presupuestos, metas, perfil, seguridad y escaneo de comprobantes.
+
+## Estado del proyecto
+
+Finza está en desarrollo activo. La base funcional del MVP ya existe, pero todavía hay módulos visuales que no tienen backend completo.
+
+Actualmente consumen API real:
+
+- Autenticación: registro e inicio de sesión.
+- Perfil básico.
+- Cuentas bancarias.
+- Tarjetas de crédito.
+- Gastos.
+- Pagos de tarjeta.
+- Resumen financiero.
+
+Actualmente son UI local, flujo preparado o función pendiente:
+
+- Ingresos y transferencias desde la pantalla de nuevo movimiento.
+- Presupuestos.
+- Metas.
+- OAuth, biometría y seguridad avanzada.
+- Escaneo de comprobantes. La interfaz existe, pero el OCR real todavía no está implementado.
+
+Las operaciones financieras de varios pasos en el backend usan transacciones de base de datos y validan que cada recurso pertenezca al usuario autenticado.
+
+## Arquitectura
 
 - `mobile/`: app Expo con React Native y TypeScript.
-- `backend/`: API FastAPI con SQLAlchemy, Alembic, Pydantic y Pytest.
-- `legacy-web/`: PWA original conservada como referencia historica.
+- `backend/`: API FastAPI con Pydantic, SQLAlchemy, Alembic y Pytest.
+- `legacy-web/`: PWA original conservada como referencia.
+- `docs/`: notas de despliegue.
+- `.github/workflows/`: validaciones de CI.
 - `docker-compose.yml`: PostgreSQL local para desarrollo y demo.
+- `render.yaml`: preparación para un futuro despliegue gratuito del backend en Render.
 
-La app movil no se conecta directamente a PostgreSQL ni a Supabase. Toda operacion financiera pasa por la API propia, que valida ownership por usuario y usa transacciones de base de datos para cambios multi-paso.
+## Tecnologías
 
-## Costo y despliegue
-
-El entorno de desarrollo apunta a costo cero:
-
-- PostgreSQL local con Docker Compose.
-- App movil probada con Expo Go o development build.
-- Backend preparado para Render Free Web Service.
-- Produccion futura puede usar `DATABASE_URL` de un PostgreSQL gratuito de Supabase, sin usar Supabase Auth ni la API automatica.
-
-No hay despliegue externo configurado desde este repositorio y no se incluyen credenciales reales.
+- Expo, React Native y TypeScript para la app móvil.
+- FastAPI para la API propia.
+- PostgreSQL como base de datos.
+- SQLAlchemy y Alembic para modelos y migraciones.
+- JWT y contraseñas hasheadas para autenticación.
+- Docker Compose para levantar PostgreSQL en local.
+- Pytest y flake8 para pruebas y lint del backend.
+- GitHub Actions para validar backend y mobile.
 
 ## Desarrollo local
 
-Las instrucciones completas se documentan junto a cada modulo:
+Requisitos recomendados:
 
-- Backend: `backend/README.md`
-- Mobile: `mobile/README.md`
-- Web anterior: `legacy-web/README.md`
+- Git.
+- Node.js y npm.
+- Python 3.11 o superior.
+- Docker Desktop.
+- Expo Go o una development build para probar en el teléfono.
 
-Inicio rapido:
+Configura variables desde los ejemplos incluidos. No se deben commitear `.env`, tokens ni credenciales reales.
+
+### Backend
+
+Desde la raíz del repo:
 
 ```powershell
 docker compose up -d postgres
+copy .env.example backend\.env
 cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
-copy ..\.env.example .env
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
+
+Health check:
+
+```powershell
+curl http://localhost:8000/health
+```
+
+### App móvil
 
 En otra terminal:
 
@@ -52,21 +106,56 @@ $env:EXPO_PUBLIC_API_URL="http://localhost:8000"
 npm run start
 ```
 
-## Estado del MVP
+Para probar desde un teléfono físico en la misma red local, usa una URL LAN alcanzable por el celular:
 
-El backend del MVP cubre registro e inicio de sesion, perfil financiero, cuentas bancarias, tarjetas de credito, gastos, pagos de tarjeta y resumen financiero. La app movil implementa las pantallas base del diseno Finza para splash, onboarding, login, inicio, movimientos, presupuesto, metas, perfil, nuevo movimiento y escaner.
+```powershell
+$env:EXPO_PUBLIC_API_URL="http://<LAN_IP>:8000"
+npm run start
+```
 
-Presupuesto, metas, OAuth, biometria, seguridad avanzada y escaneo de comprobantes se muestran como UI local o acciones deshabilitadas porque el backend aun no expone esos servicios. No se simula sincronizacion remota para esas funciones.
+En builds Android locales que apunten a un backend HTTP de la red local, también se puede habilitar cleartext solo para esa build:
 
-Las notificaciones, publicacion en tiendas, CloudFront y Firebase quedan fuera del alcance inicial.
+```powershell
+$env:EXPO_PUBLIC_API_URL="http://<LAN_IP>:8000"
+$env:EXPO_ALLOW_CLEARTEXT="1"
+npx expo prebuild --platform android
+```
 
-## CI
+No habilites `EXPO_ALLOW_CLEARTEXT` en producción. Las builds públicas deben usar HTTPS.
 
-GitHub Actions valida:
+## Validaciones
 
-- Backend: instalacion, `flake8` y `pytest`.
-- Mobile: `npm ci` y `npm run typecheck`.
+Backend:
+
+```powershell
+cd backend
+python -m flake8 app tests
+python -m pytest
+```
+
+Mobile:
+
+```powershell
+cd mobile
+npm run typecheck
+```
 
 ## Despliegue futuro
 
-Consulta `docs/deployment.md`. El repositorio incluye `render.yaml` para preparar Render, pero no se ha hecho deploy ni se han conectado cuentas externas.
+El objetivo de costo para desarrollo y demo es cero:
+
+- PostgreSQL local con Docker Compose durante desarrollo.
+- Backend preparado para Render Free Web Service.
+- Producción futura puede usar PostgreSQL gratuito de Supabase mediante `DATABASE_URL`.
+
+Supabase se contempla solo como PostgreSQL administrado. Finza no usa Supabase Auth ni la API automática de Supabase. El backend FastAPI conserva la autenticación y las reglas de acceso.
+
+Más detalles: `docs/deployment.md`.
+
+## Hoja de ruta
+
+- OCR real para escaneo de comprobantes.
+- Backend completo para presupuestos y metas.
+- Soporte real para ingresos y transferencias.
+- Despliegue seguro con HTTPS.
+- Pruebas móviles automatizadas y validación en dispositivos reales.
